@@ -13,7 +13,8 @@ import NaturalLanguage
 struct Translate: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "translate",
-    abstract: "Translate text to a target language using Apple Translation."
+    abstract: "Translate text to a target language using Apple Translation.",
+    version: "0.1"
   )
 
   @Argument(help: "The text to translate.")
