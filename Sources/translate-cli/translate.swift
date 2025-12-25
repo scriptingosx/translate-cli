@@ -18,33 +18,50 @@ struct Translate: AsyncParsableCommand {
   )
 
   @Argument(help: "The text to translate.")
-  var text: [String]
+  var arguments: [String]
 
   @Option(name: .shortAndLong, help: "Target language code (e.g., 'es', 'fr', 'de', 'ja').")
-  var to: String
+  var to: String?
 
   @Option(name: .shortAndLong, help: "Source language code (optional). If omitted, auto-detect.")
   var from: String?
 
-  func run() async throws {
-    guard !text.isEmpty else {
-      throw CleanExit.message("no text to translate")
-    }
+  var text: String {
+    arguments.joined(separator: " ")
+  }
 
-    let text = text.joined(separator: " ")
-
-    let targetLanguage = Locale.Language(identifier: to)
-    let sourceLanguage: Locale.Language
-
+  var sourceLanguage: Locale.Language {
     if let from {
-      sourceLanguage = Locale.Language(identifier: from)
+      return Locale.Language(identifier: from)
     } else {
       if let dominantLanguage = NLLanguageRecognizer.dominantLanguage(for: text) {
-        let language = Locale.Language(identifier: dominantLanguage.rawValue)
-        sourceLanguage = language
+        return Locale.Language(identifier: dominantLanguage.rawValue)
       } else {
-        sourceLanguage = Locale.current.language
+        return Locale.current.language
       }
+    }
+  }
+
+  var targetLanguage: Locale.Language {
+    if let to {
+      return Locale.Language(identifier: to)
+    } else {
+      return Locale.current.language
+    }
+  }
+
+  func run() async throws {
+    guard !arguments.isEmpty else {
+      print("no text to translate")
+      throw ExitCode(2)
+    }
+
+    let sourceLanguage = sourceLanguage
+    let targetLanguage = targetLanguage
+
+    guard sourceLanguage.languageCode != targetLanguage.languageCode else {
+      print("source and target language seem to be the same, use --to and --from options!")
+      throw ExitCode(3)
     }
 
     let session = TranslationSession(installedSource: sourceLanguage, target: targetLanguage)
