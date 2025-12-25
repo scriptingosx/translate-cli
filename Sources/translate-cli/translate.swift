@@ -20,10 +20,10 @@ struct Translate: AsyncParsableCommand {
   @Argument(help: "The text to translate.")
   var arguments: [String]
 
-  @Option(name: .shortAndLong, help: "Target language code (e.g., 'es', 'fr', 'de', 'ja').")
+  @Option(name: .long, help: "Target language code (e.g., 'es', 'fr', 'de', 'ja'). Default is current language.")
   var to: String?
 
-  @Option(name: .shortAndLong, help: "Source language code (optional). If omitted, auto-detect.")
+  @Option(name: .long, help: "Source language code. If omitted, auto-detect.")
   var from: String?
 
   var text: String {
