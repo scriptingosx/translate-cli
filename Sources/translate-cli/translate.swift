@@ -18,7 +18,7 @@ struct Translate: AsyncParsableCommand {
   )
 
   @Argument(help: "The text to translate.")
-  var arguments: [String]
+  var arguments: [String] = []
 
   @Option(name: .long, help: "Target language code (e.g., 'es', 'fr', 'de', 'ja'). Default is current language.")
   var to: String?
@@ -29,8 +29,12 @@ struct Translate: AsyncParsableCommand {
   @Flag(help: "detect the language of the text and print the code")
   var detect: Bool = false
 
-  var text: String {
-    arguments.joined(separator: " ")
+  func joinedArguments() throws -> String {
+    guard !arguments.isEmpty else {
+      print("no text to translate")
+      throw ExitCode(2)
+    }
+    return arguments.joined(separator: " ")
   }
 
   var targetLanguage: Locale.Language {
@@ -53,15 +57,22 @@ struct Translate: AsyncParsableCommand {
     }
   }
 
-  func run() async throws {
-    guard !arguments.isEmpty else {
-      print("no text to translate")
-      throw ExitCode(2)
+  func readFromStdin () -> String {
+    var lines: [String] = []
+
+    while let line = readLine() {
+      lines.append(line)
     }
+
+    return lines.joined(separator: "\n")
+  }
+
+  func run() async throws {
+    let text = arguments.isEmpty ? readFromStdin() : try joinedArguments()
 
     let sourceLanguage = detectLanguage(text)
 
-    guard !detect else {
+    if detect {
       throw CleanExit.message("\(sourceLanguage.languageCode ?? "unknown")")
     }
 
