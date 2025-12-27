@@ -26,11 +26,22 @@ struct Translate: AsyncParsableCommand {
   @Option(name: .long, help: "Source language code. If omitted, auto-detect.")
   var from: String?
 
+  @Flag(help: "detect the language of the text and print the code")
+  var detect: Bool = false
+
   var text: String {
     arguments.joined(separator: " ")
   }
 
-  var sourceLanguage: Locale.Language {
+  var targetLanguage: Locale.Language {
+    if let to {
+      return Locale.Language(identifier: to)
+    } else {
+      return Locale.current.language
+    }
+  }
+
+  func detectLanguage(_ text: String) -> Locale.Language {
     if let from {
       return Locale.Language(identifier: from)
     } else {
@@ -42,21 +53,18 @@ struct Translate: AsyncParsableCommand {
     }
   }
 
-  var targetLanguage: Locale.Language {
-    if let to {
-      return Locale.Language(identifier: to)
-    } else {
-      return Locale.current.language
-    }
-  }
-
   func run() async throws {
     guard !arguments.isEmpty else {
       print("no text to translate")
       throw ExitCode(2)
     }
 
-    let sourceLanguage = sourceLanguage
+    let sourceLanguage = detectLanguage(text)
+
+    guard !detect else {
+      throw CleanExit.message("\(sourceLanguage.languageCode ?? "unknown")")
+    }
+
     let targetLanguage = targetLanguage
 
     guard sourceLanguage.languageCode != targetLanguage.languageCode else {
