@@ -34,7 +34,7 @@ struct Translate: AsyncParsableCommand {
   var detect: Bool = false
 
   /// returns the `arguments` array as a single string joined with spaces. Throws when the `arguments` array is empty.
-  func joinedArguments() throws -> String {
+  func joined(arguments: [String]) throws -> String {
     guard !arguments.isEmpty else {
       print("no text to translate")
       throw ExitCode(2)
@@ -60,7 +60,7 @@ struct Translate: AsyncParsableCommand {
     }
   }
 
-  /// determines the dominant language of the `text`
+  /// returns the dominant language of the `text`
   func detectLanguage(_ text: String) -> Locale.Language? {
     if let dominantLanguage = NLLanguageRecognizer.dominantLanguage(for: text) {
       return Locale.Language(identifier: dominantLanguage.rawValue)
@@ -80,27 +80,34 @@ struct Translate: AsyncParsableCommand {
     return lines.joined(separator: "\n")
   }
 
-  func run() async throws {
-    let text = arguments.isEmpty ? readFromStdin() : try joinedArguments()
+  /// returns the translation for `text`, `source` and `target`
+  func translate(
+    _ text: String,
+    from source: Locale.Language,
+    to target: Locale.Language
+  ) async throws -> String {
+    guard source.languageCode != target.languageCode else {
+      print("source and target language seem to be the same, use --to and --from options!")
+      throw ExitCode(3)
+    }
 
+    let session = TranslationSession(installedSource: source, target: target)
+
+    let result = try await session.translate(text)
+
+    return result.targetText
+  }
+
+  func run() async throws {
+    let text = arguments.isEmpty ? readFromStdin() : try joined(arguments: arguments)
     let sourceLanguage = sourceLanguage(text)
 
     if detect {
       throw CleanExit.message("\(sourceLanguage.languageCode ?? "unknown")")
     }
 
-    let targetLanguage = targetLanguage
-
-    guard sourceLanguage.languageCode != targetLanguage.languageCode else {
-      print("source and target language seem to be the same, use --to and --from options!")
-      throw ExitCode(3)
-    }
-
-    let session = TranslationSession(installedSource: sourceLanguage, target: targetLanguage)
-
-    let result = try await session.translate(text)
-
-    print(result.targetText)
+    let translation = try await translate(text, from: sourceLanguage, to: targetLanguage)
+    print(translation)
   }
 }
 
