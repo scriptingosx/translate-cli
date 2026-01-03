@@ -33,7 +33,7 @@ struct Translate: AsyncParsableCommand {
   var arguments: [String] = []
 
   @Option(name: .long, help: "Target language code (e.g., 'en', 'fr', 'de', 'ja'). Default is current language.")
-  var to: String?
+  var to: [String] = []
 
   @Option(name: .long, help: "Source language code. If omitted, auto-detect.")
   var from: String?
@@ -51,11 +51,11 @@ struct Translate: AsyncParsableCommand {
   }
 
   /// returns either the Language from the `--to` option or the current system language
-  var targetLanguage: Locale.Language {
-    if let to {
-      return Locale.Language(identifier: to)
+  var targetLanguages: [Locale.Language] {
+    if to.count > 0 {
+      return to.map { Locale.Language(identifier: $0) }
     } else {
-      return Locale.current.language
+      return [ Locale.current.language ]
     }
   }
 
@@ -114,8 +114,16 @@ struct Translate: AsyncParsableCommand {
       throw CleanExit.message("\(sourceLanguage.languageCode ?? "unknown")")
     }
 
-    let translation = try await translate(text, from: sourceLanguage, to: targetLanguage)
-    print(translation)
+    if to.count == 1,
+       let targetLanguage = targetLanguages.first {
+      let translation = try await translate(text, from: sourceLanguage, to: targetLanguage)
+      print(translation)
+    } else {
+      for targetLanguage in targetLanguages {
+        let translation = try await translate(text, from: sourceLanguage, to: targetLanguage)
+        print("\(targetLanguage.languageCode, default: "??"): \(translation)")
+      }
+    }
   }
 }
 

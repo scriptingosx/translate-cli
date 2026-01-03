@@ -33,15 +33,15 @@ struct translateTests {
   func testTargetLanguage() {
     // Case 1: with --to option
     var cmdWithTo = Translate()
-    cmdWithTo.to = "fr"
-    let targetWithTo = cmdWithTo.targetLanguage
-    #expect(targetWithTo.languageCode == "fr")
+    cmdWithTo.to = ["fr"]
+    let targetWithTo = cmdWithTo.targetLanguages
+    #expect(targetWithTo.first?.languageCode == "fr")
 
     // Case 2: without --to option, falls back to current
     var cmdNoTo = Translate()
-    cmdNoTo.to = nil
-    let targetNoTo = cmdNoTo.targetLanguage
-    #expect(targetNoTo.languageCode == Locale.current.language.languageCode)
+    cmdNoTo.to = []
+    let targetNoTo = cmdNoTo.targetLanguages
+    #expect(targetNoTo.first?.languageCode == Locale.current.language.languageCode)
   }
 
   @Test("sourceLanguage")
@@ -64,7 +64,7 @@ struct translateTests {
     var cmd = Translate()
     // Clear options to ensure pure detection
     cmd.from = nil
-    cmd.to = nil
+    cmd.to = []
 
     // Known French phrase should detect as fr
     let fr = cmd.detectLanguage("bonjour le monde")
