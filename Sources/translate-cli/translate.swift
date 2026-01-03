@@ -17,8 +17,16 @@ struct Translate: AsyncParsableCommand {
     discussion: """
       This command line tool uses the Translation service to translate text passed as arguments
       from one language to another using Apple's Translation framework.
+      
+      Important:
+      You have to download the Translation resources in 
+      
+      System Settings > Languge & Region > Translation Languages… (button at the bottom of that pane) 
+      
+      _before_ using this tool. Otherwise you will get `Error: Unable to Translate` messages.
+      You only need to download the languages you are going to use.    
       """,
-    version: "0.1"
+    version: "0.2"
   )
 
   @Argument(help: "The text to translate. When no text is given, text will be read from standard input.")
