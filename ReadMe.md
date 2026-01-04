@@ -46,11 +46,20 @@ $ translate "Dies ist ein kurzer Satz!"
 This is a short sentence.
 ```
 
-You can set a different target language with the `--to` flag:
+You can set different target languages with the `--to` flag:
 
 ```sh
-$ translate --to fr "Dies ist ein kurzer Satz."
+$ translate "Dies ist ein kurzer Satz." --to fr
 C'est une courte phrase.
+```
+
+You can provide multiple `--to` options with different language codes. Each translation will be prepended with the language code.
+
+```sh
+$ translate --to en --to fr --to es "Dies ist ein kurzer Satz."
+en: This is a short sentence.
+fr: C'est une courte phrase.
+es: Esta es una frase corta.
 ```
 
 The source language will be determined from the text. You can override the detection with the `--from` flag:
