@@ -15,9 +15,7 @@ struct TranslateArguments: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "text",
     abstract: "Translate text using Apple Translation.",
-    discussion: """
-      Translates text passed as arguments from one language to another.
-      """,
+    discussion: "Translates text passed as arguments from one language to another.",
   )
 
   @Argument(help: "The text to translate. When no text is given, text will be read from standard input.")
