@@ -76,18 +76,18 @@ struct translateTests {
 
   @Test("translate")
   func testTranslate() async throws {
-    let cmd = TranslateArguments()
+    let engine = TranslateEngine()
     let en = Locale.Language(languageCode: "en")
     let fr = Locale.Language(languageCode: "fr")
 
     await #expect(throws: ExitCode.self) {
-      try await cmd.translate("Hello", from: en, to: en)
+      try await engine.translate("Hello", from: en, to: en)
     }
 
-    let frToEn = try await cmd.translate("Bonjour", from: fr, to: en)
+    let frToEn = try await engine.translate("Bonjour", from: fr, to: en)
     #expect(frToEn == "Hello")
 
-    let enToFr = try await cmd.translate("Hello", from: en, to: fr)
+    let enToFr = try await engine.translate("Hello", from: en, to: fr)
     #expect(enToFr == "Bonjour")
   }
 }

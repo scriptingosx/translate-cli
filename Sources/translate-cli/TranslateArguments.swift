@@ -77,27 +77,10 @@ struct TranslateArguments: AsyncParsableCommand {
     return lines.joined(separator: "\n")
   }
 
-  /// returns the translation for `text`, `source` and `target`
-  func translate(
-    _ text: String,
-    from source: Locale.Language,
-    to target: Locale.Language
-  ) async throws -> String {
-    guard source.languageCode != target.languageCode else {
-      print("source and target language seem to be the same, use --to and --from options!")
-      throw ExitCode(3)
-    }
-
-    let session = TranslationSession(installedSource: source, target: target)
-
-    let result = try await session.translate(text)
-
-    return result.targetText
-  }
-
   func run() async throws {
     let text = arguments.isEmpty ? readFromStdin() : try joined(arguments: arguments)
     let sourceLanguage = sourceLanguage(text)
+    let engine = TranslateEngine()
 
     if detect {
       throw CleanExit.message("\(sourceLanguage.languageCode ?? "unknown")")
@@ -105,11 +88,12 @@ struct TranslateArguments: AsyncParsableCommand {
 
     if to.count == 1,
        let targetLanguage = targetLanguages.first {
-      let translation = try await translate(text, from: sourceLanguage, to: targetLanguage)
+      
+      let translation = try await engine.translate(text, from: sourceLanguage, to: targetLanguage)
       print(translation)
     } else {
       for targetLanguage in targetLanguages {
-        let translation = try await translate(text, from: sourceLanguage, to: targetLanguage)
+        let translation = try await engine.translate(text, from: sourceLanguage, to: targetLanguage)
         print("\(targetLanguage.languageCode, default: "??"): \(translation)")
       }
     }
