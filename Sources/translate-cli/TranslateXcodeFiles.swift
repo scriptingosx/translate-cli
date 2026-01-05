@@ -16,13 +16,13 @@ struct TranslateXcodeFiles: AsyncParsableCommand {
   }
   
   static let configuration = CommandConfiguration(
-    commandName: "xcode",
+    commandName: "xcstrings",
     abstract: "Translate fields in xcstrings files.",
     discussion: """
       Use this to take a xcstrings file and create a new file with the translations, \
       provided by the translation service, filled in.
       """,
-    aliases: ["xc"]
+    aliases: ["xcs"]
   )
   
   // MARK: arguments
@@ -57,19 +57,10 @@ struct TranslateXcodeFiles: AsyncParsableCommand {
     return nil
   }
   
-  func translateXCString(_ stringsDict: [String:Any]) async throws -> [String:Any] {
-    // get source language
-    let sourceLanguageCode = (stringsDict["stringsFileLanguageCode"] as? String) ?? "en"
-    print("Source language: \(sourceLanguageCode)")
-    
-    let sourceLanguage = Locale.Language(identifier: sourceLanguageCode)
-    
-    print("Target languages: \(to.map(\.minimalIdentifier).joined(separator: ", "))")
-    
-    guard let strings = stringsDict["strings"] as? [String: Any] else {
-      try exit("no translatable strings in xcstrings file at \(sourcePath)", code: EX_DATAERR)
-    }
-    
+  func translateStrings(
+    _ strings: [String: Any],
+    sourceLanguage: Locale.Language
+  ) async throws -> [String: Any] {
     var translatedStrings: [String: Any] = [:]
     
     // loop through strings
@@ -122,12 +113,44 @@ struct TranslateXcodeFiles: AsyncParsableCommand {
       translatedValue["localizations"] = localizations
       translatedStrings[key] = translatedValue
     }
+    return translatedStrings
+  }
+  
+  func translateXCString(_ stringsDict: [String:Any]) async throws -> [String:Any] {
+    // get source language
+    let sourceLanguageCode = (stringsDict["stringsFileLanguageCode"] as? String) ?? "en"
+    print("Source language: \(sourceLanguageCode)")
+    
+    let sourceLanguage = Locale.Language(identifier: sourceLanguageCode)
+    
+    print("Target languages: \(to.map(\.minimalIdentifier).joined(separator: ", "))")
+    
+    guard let strings = stringsDict["strings"] as? [String: Any] else {
+      try exit("no translatable strings in xcstrings file at \(sourcePath)", code: EX_DATAERR)
+    }
     
     var translatedDict = stringsDict
-    translatedDict["strings"] = translatedStrings
+    translatedDict["strings"] = try await translateStrings(strings, sourceLanguage: sourceLanguage)
     return translatedDict
   }
 
+  func writeToFile(_ data: Data) throws {
+    if !dryRun, let outputPath = outputPath {
+      let outputURL = URL(filePath: outputPath)
+      do {
+        try data.write(to: outputURL)
+        print("✅ Successfully wrote translated file to \(outputPath)")
+      } catch {
+        try exit("❌ Failed to write to \(outputPath): \(error)", code: EX_CANTCREAT)
+      }
+    } else if dryRun {
+      print("ℹ️ Dry run: not writing output file.")
+    } else {
+      print("ℹ️ No output path provided, printing result to stdout.")
+      print()
+      print(String(data: data, encoding: .utf8) ?? "No data")
+    }
+  }
 
   // MARK: run()
   
@@ -149,9 +172,7 @@ struct TranslateXcodeFiles: AsyncParsableCommand {
     }
     
     let json = try JSONSerialization.data(withJSONObject: translatedDict, options: .prettyPrinted)
-    print(String(data: json, encoding: .utf8) ?? "No data")
     
-    // TODO: write to output file
-    
+    try writeToFile(json)
   }
 }
