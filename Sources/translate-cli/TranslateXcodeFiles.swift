@@ -113,13 +113,9 @@ struct TranslateXcodeFiles: AsyncParsableCommand {
             ]
           ]
           localizations[targetLanguageCode] = translatedLocalization
-          
-          
-        } catch TranslationError.notInstalled {
-          print("❌ Translation language for \(targetLanguageCode) is not downloaded, skipping translation for '\(key)'")
-          continue
         } catch {
           print("❌ Error: \(error)")
+          continue
         }
         
       }
@@ -154,8 +150,8 @@ struct TranslateXcodeFiles: AsyncParsableCommand {
     
     let json = try JSONSerialization.data(withJSONObject: translatedDict, options: .prettyPrinted)
     print(String(data: json, encoding: .utf8) ?? "No data")
-    // write to output file
     
+    // TODO: write to output file
     
   }
 }

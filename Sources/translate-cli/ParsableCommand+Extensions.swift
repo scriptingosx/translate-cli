@@ -9,7 +9,7 @@ import Foundation
 import ArgumentParser
 
 func errorPrint(_ message: String) {
-  fputs("error: \(message)\n", stderr)
+  fputs("\(message)\n", stderr)
   fflush(stderr)
 }
 

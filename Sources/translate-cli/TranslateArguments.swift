@@ -82,8 +82,9 @@ struct TranslateArguments: AsyncParsableCommand {
     let sourceLanguage = sourceLanguage(text)
     let engine = TranslateEngine()
 
+    // TODO: detect should be its own sub command
     if detect {
-      throw CleanExit.message("\(sourceLanguage.languageCode ?? "unknown")")
+      throw CleanExit.message("\(sourceLanguage.localizedName ?? "unknown") (\(sourceLanguage.languageCode ?? "unknown"))")
     }
 
     if to.count == 1,
