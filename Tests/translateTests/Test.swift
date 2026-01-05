@@ -16,7 +16,7 @@ struct translateTests {
 
   @Test("joinedArguments")
   func testJoinedArguments1() {
-    let translate = Translate()
+    let translate = TranslateArguments()
 
     let joined1 = try? translate.joined(arguments: ["Hello"])
     #expect(joined1 == "Hello")
@@ -32,13 +32,13 @@ struct translateTests {
   @Test("targetLanguage")
   func testTargetLanguage() {
     // Case 1: with --to option
-    var cmdWithTo = Translate()
-    cmdWithTo.to = ["fr"]
+    var cmdWithTo = TranslateArguments()
+    cmdWithTo.to = [Locale.Language(identifier: "fr")]
     let targetWithTo = cmdWithTo.targetLanguages
     #expect(targetWithTo.first?.languageCode == "fr")
 
     // Case 2: without --to option, falls back to current
-    var cmdNoTo = Translate()
+    var cmdNoTo = TranslateArguments()
     cmdNoTo.to = []
     let targetNoTo = cmdNoTo.targetLanguages
     #expect(targetNoTo.first?.languageCode == Locale.current.language.languageCode)
@@ -47,13 +47,13 @@ struct translateTests {
   @Test("sourceLanguage")
   func testSourceLanguage() {
     // Case 1: with --from option
-    var cmdWithFrom = Translate()
-    cmdWithFrom.from = "en"
+    var cmdWithFrom = TranslateArguments()
+    cmdWithFrom.from = Locale.Language(identifier: "en")
     let srcWithFrom = cmdWithFrom.sourceLanguage("bonjour")
     #expect(srcWithFrom.languageCode == "en")
 
     // Case 2: without --from option, should detect dominant language from text
-    var cmdDetect = Translate()
+    var cmdDetect = TranslateArguments()
     cmdDetect.from = nil
     let detected = cmdDetect.sourceLanguage("bonjour")
     #expect(detected.languageCode == "fr")
@@ -61,7 +61,7 @@ struct translateTests {
 
   @Test("detectLanguage")
   func testDetectLanguage() {
-    var cmd = Translate()
+    var cmd = TranslateArguments()
     // Clear options to ensure pure detection
     cmd.from = nil
     cmd.to = []
@@ -76,7 +76,7 @@ struct translateTests {
 
   @Test("translate")
   func testTranslate() async throws {
-    let cmd = Translate()
+    let cmd = TranslateArguments()
     let en = Locale.Language(languageCode: "en")
     let fr = Locale.Language(languageCode: "fr")
 

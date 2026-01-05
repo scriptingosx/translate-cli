@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  TranslateArguments.swift
 //  translate-cli
 //
 //  Created by Armin Briegel on 2026-01-03.
@@ -16,8 +16,7 @@ struct TranslateArguments: AsyncParsableCommand {
     commandName: "text",
     abstract: "Translate text using Apple Translation.",
     discussion: """
-      This command line tool uses the Translation service to translate text passed as arguments
-      from one language to another using Apple's Translation framework.
+      Translates text passed as arguments from one language to another.
       """,
   )
 
@@ -27,12 +26,12 @@ struct TranslateArguments: AsyncParsableCommand {
   @Option(
     name: .long,
     parsing: .singleValue,
-    help: "Target language code (e.g., 'en', 'fr', 'de', 'ja'). Default is current language."
+    help: "Target language code. Default is current language."
   )
-  var to: [String] = []
+  var to: [Locale.Language] = []
 
   @Option(name: .long, help: "Source language code. If omitted, auto-detect.")
-  var from: String?
+  var from: Locale.Language?
 
   @Flag(help: "detect the language of the text and print the code")
   var detect: Bool = false
@@ -49,7 +48,7 @@ struct TranslateArguments: AsyncParsableCommand {
   /// returns either the Language from the `--to` option or the current system language
   var targetLanguages: [Locale.Language] {
     if to.count > 0 {
-      return to.map { Locale.Language(identifier: $0) }
+      return to
     } else {
       return [ Locale.current.language ]
     }
@@ -57,11 +56,7 @@ struct TranslateArguments: AsyncParsableCommand {
 
   /// returns either the language from the `--from` option or the dominant language from the `text`
   func sourceLanguage(_ text: String) -> Locale.Language {
-    if let from {
-      return Locale.Language(identifier: from)
-    } else {
-      return detectLanguage(text) ?? Locale.current.language
-    }
+    from ?? detectLanguage(text) ?? Locale.current.language
   }
 
   /// returns the dominant language of the `text`

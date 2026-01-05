@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  TranslateXcodeFiles.swift
 //  translate-cli
 //
 //  Created by Armin Briegel on 2026-01-03.

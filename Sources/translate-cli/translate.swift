@@ -15,7 +15,7 @@ struct Translate: AsyncParsableCommand {
     commandName: "translate",
     abstract: "Translate using Apple Translation.",
     discussion: """
-      This command line tool uses the Translation service to translate text
+      This command line tool uses the Translation service to translate text \
       from one language to another using Apple's Translation framework.
       
       Important:
@@ -24,7 +24,7 @@ struct Translate: AsyncParsableCommand {
          System Settings > Languge & Region > Translation Languages…
          (button at the bottom of that pane) 
       
-      _before_ using this tool. Otherwise you will get `Error: Unable to Translate` messages.
+      _before_ using this tool. Otherwise you will get `Error: Unable to Translate` messages. \
       You only need to download the languages you are going to use.    
       """,
     version: "0.2",
@@ -33,4 +33,3 @@ struct Translate: AsyncParsableCommand {
   )
 
 }
-
