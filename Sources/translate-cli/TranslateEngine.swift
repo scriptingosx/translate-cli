@@ -18,7 +18,7 @@ struct TranslateEngine {
   ) async throws -> String {
     // TODO: this should move else where?
     guard source.languageCode != target.languageCode else {
-      print("source and target language seem to be the same, use --to and --from options!")
+      errorPrint("❌ source and target language seem to be the same, use --to and --from options!")
       throw ExitCode(3)
     }
     

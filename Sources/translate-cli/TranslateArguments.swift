@@ -37,7 +37,7 @@ struct TranslateArguments: AsyncParsableCommand {
   /// returns the `arguments` array as a single string joined with spaces. Throws when the `arguments` array is empty.
   func joined(arguments: [String]) throws -> String {
     guard !arguments.isEmpty else {
-      print("no text to translate")
+      errorPrint("no text to translate")
       throw ExitCode(2)
     }
     return arguments.joined(separator: " ")
