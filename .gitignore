@@ -7,3 +7,9 @@ DerivedData/
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .swiftpm/xcode/xcshareddata
 .netrc
+
+# these products of the command might end up in the project repo
+*.xcstrings
+*.xcloc
+*.mobileconfig
+*.plist
