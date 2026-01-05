@@ -65,8 +65,10 @@ struct TranslateXcodeFiles: AsyncParsableCommand {
     
     // loop through strings
     for (key, value) in strings {
+      errorPrint("\n")
+      
       guard let value = value as? [String:Any] else {
-        errorPrint("⚠️ found non-dictionary value for '\(key)', skipping")
+        errorPrint("⚠️  found non-dictionary value for '\(key)', skipping")
         continue
       }
       
@@ -74,29 +76,42 @@ struct TranslateXcodeFiles: AsyncParsableCommand {
       let shouldTranslate = (value["shouldTranslate"] as? Bool) ?? true
       if !shouldTranslate {
         translatedStrings[key] = value
-        errorPrint("ℹ️ 'shouldTranslate' is false for '\(key)', not translating")
+        errorPrint("ℹ️  'shouldTranslate' is false for '\(key)', not translating")
         continue
       }
       
       let engine = TranslateEngine()
       var translatedValue = value
       var localizations = value["localizations"] as? [String:Any] ?? [:]
+      
+      // get base language value to translation
+      guard let baseLocalization = localizations[sourceLanguage.minimalIdentifier] as? [String:Any],
+         let baseStringUnit = baseLocalization["stringUnit"] as? [String:String],
+         let baseValue = baseStringUnit["value"],
+         !baseValue.isEmpty else {
+        errorPrint("⚠️  couldn't get base translation for '\(key)', skipping")
+        continue
+      }
+      errorPrint("ℹ️  '\(key)': \(baseValue)")
+      
       // loop through targetTranslations
       for targetLanguage in to {
         let targetLanguageCode = targetLanguage.minimalIdentifier
+        
         // don't translate/replace existing translations
-        
-        let localization = localizations[targetLanguageCode] as? [String:Any]
-        
-        if localization != nil && !overwriteTranslations {
-          errorPrint("ℹ️ '\(key)' already translated to \(targetLanguageCode), skipping")
+        if let localization = localizations[targetLanguageCode] as? [String:Any],
+           let stringUnit = localization["stringUnit"] as? [String:String],
+           let stringValue = stringUnit["value"],
+           !stringValue.isEmpty,
+           !overwriteTranslations {
+          errorPrint("ℹ️  \(targetLanguageCode): translation exists")
           continue
         }
         
         // add translations
         do {
-          let translated = try await engine.translate(key, from: sourceLanguage, to: targetLanguage)
-          errorPrint("✅ translated '\(key)' to \(targetLanguageCode): \(translated)")
+          let translated = try await engine.translate(baseValue, from: sourceLanguage, to: targetLanguage)
+          errorPrint("✅ \(targetLanguageCode): \(translated)")
           let translatedLocalization = [
             "stringUnit": [
               "state": state.rawValue,
@@ -144,9 +159,9 @@ struct TranslateXcodeFiles: AsyncParsableCommand {
         try exit("❌ Failed to write to \(outputPath): \(error)", code: EX_CANTCREAT)
       }
     } else if dryRun {
-      errorPrint("ℹ️ Dry run: not writing output file.")
+      errorPrint("ℹ️  Dry run: not writing output file.")
     } else {
-      errorPrint("ℹ️ No output path provided, printing result to stdout.")
+      errorPrint("ℹ️  No output path provided, printing result to stdout.")
       errorPrint("")
       print(String(data: data, encoding: .utf8) ?? "No data")
     }
@@ -172,6 +187,8 @@ struct TranslateXcodeFiles: AsyncParsableCommand {
     }
     
     let json = try JSONSerialization.data(withJSONObject: translatedDict, options: .prettyPrinted)
+    
+    errorPrint("\n")
     
     try writeToFile(json)
   }
