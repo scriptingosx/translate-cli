@@ -26,10 +26,10 @@ struct TranslateArguments: AsyncParsableCommand {
     parsing: .singleValue,
     help: "Target language code. Default is current language."
   )
-  var to: [Locale.Language] = []
+  var to: [Locale] = []
 
   @Option(name: .long, help: "Source language code. If omitted, auto-detect.")
-  var from: Locale.Language?
+  var from: Locale?
 
   @Flag(help: "detect the language of the text and print the code")
   var detect: Bool = false
@@ -46,7 +46,7 @@ struct TranslateArguments: AsyncParsableCommand {
   /// returns either the Language from the `--to` option or the current system language
   var targetLanguages: [Locale.Language] {
     if to.count > 0 {
-      return to
+      return to.compactMap(\.language)
     } else {
       return [ Locale.current.language ]
     }
@@ -54,7 +54,7 @@ struct TranslateArguments: AsyncParsableCommand {
 
   /// returns either the language from the `--from` option or the dominant language from the `text`
   func sourceLanguage(_ text: String) -> Locale.Language {
-    from ?? detectLanguage(text) ?? Locale.current.language
+    from?.language ?? detectLanguage(text) ?? Locale.current.language
   }
 
   /// returns the dominant language of the `text`

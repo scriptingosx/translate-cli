@@ -36,7 +36,7 @@ struct TranslateXcodeFiles: AsyncParsableCommand {
   var outputPath: String?
   
   @Option(help: "Target language code.")
-  var to: [Locale.Language]
+  var to: [Locale]
   
   @Option(help: "state that is set on translated strings")
   var state: State = .needsReview
@@ -95,30 +95,30 @@ struct TranslateXcodeFiles: AsyncParsableCommand {
       errorPrint("ℹ️  '\(key)': \(baseValue)")
       
       // loop through targetTranslations
-      for targetLanguage in to {
-        let targetLanguageCode = targetLanguage.minimalIdentifier
+      for targetLocale in to {
+        let targetLanguageCode = targetLocale.language.minimalIdentifier
         
         // don't translate/replace existing translations
-        if let localization = localizations[targetLanguageCode] as? [String:Any],
+        if let localization = localizations[targetLocale.identifier] as? [String:Any],
            let stringUnit = localization["stringUnit"] as? [String:String],
            let stringValue = stringUnit["value"],
            !stringValue.isEmpty,
            !overwriteTranslations {
-          errorPrint("ℹ️  \(targetLanguageCode): translation exists")
+          errorPrint("ℹ️  \(targetLocale.identifier): translation exists")
           continue
         }
         
         // add translations
         do {
-          let translated = try await engine.translate(baseValue, from: sourceLanguage, to: targetLanguage)
-          errorPrint("✅ \(targetLanguageCode): \(translated)")
+          let translated = try await engine.translate(baseValue, from: sourceLanguage, to: targetLocale.language)
+          errorPrint("✅ \(targetLocale.identifier)): \(translated)")
           let translatedLocalization = [
             "stringUnit": [
               "state": state.rawValue,
               "value": translated
             ]
           ]
-          localizations[targetLanguageCode] = translatedLocalization
+          localizations[targetLocale.identifier] = translatedLocalization
         } catch {
           errorPrint("❌ Error: \(error)")
           continue
@@ -135,10 +135,11 @@ struct TranslateXcodeFiles: AsyncParsableCommand {
     // get source language
     let sourceLanguageCode = (stringsDict["stringsFileLanguageCode"] as? String) ?? "en"
     
-    let sourceLanguage = Locale.Language(identifier: sourceLanguageCode)
-    errorPrint("Source language: \(sourceLanguage.localizedName ?? "??") (\(sourceLanguageCode))")
+    let sourceLocale = Locale(identifier: sourceLanguageCode)
+    let sourceLanguage = sourceLocale.language
+    errorPrint("Source language: \(sourceLanguage.minimalIdentifier) (\(sourceLanguageCode))")
     
-    errorPrint("Target languages: \(to.compactMap(\.localizedName).joined(separator: ", "))")
+    errorPrint("Target languages: \(to.compactMap(\.language.minimalIdentifier).joined(separator: ", "))")
     
     guard let strings = stringsDict["strings"] as? [String: Any] else {
       try exit("no translatable strings in xcstrings file at \(sourcePath)", code: EX_DATAERR)

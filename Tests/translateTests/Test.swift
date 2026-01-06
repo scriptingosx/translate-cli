@@ -33,7 +33,7 @@ struct translateTests {
   func testTargetLanguage() {
     // Case 1: with --to option
     var cmdWithTo = TranslateArguments()
-    cmdWithTo.to = [Locale.Language(identifier: "fr")]
+    cmdWithTo.to = [Locale(identifier: "fr")]
     let targetWithTo = cmdWithTo.targetLanguages
     #expect(targetWithTo.first?.languageCode == "fr")
 
@@ -48,7 +48,7 @@ struct translateTests {
   func testSourceLanguage() {
     // Case 1: with --from option
     var cmdWithFrom = TranslateArguments()
-    cmdWithFrom.from = Locale.Language(identifier: "en")
+    cmdWithFrom.from = Locale(identifier: "en")
     let srcWithFrom = cmdWithFrom.sourceLanguage("bonjour")
     #expect(srcWithFrom.languageCode == "en")
 
