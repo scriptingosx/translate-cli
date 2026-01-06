@@ -87,4 +87,25 @@ $ translate detect "Dies ist ein kurzer Satz."
 de
 ```
 
+### Translating xcstrings files
+
+Xcode uses xcstrings to store localizations of text strings. You can use `translate` to add translations to an xcstrings file.
+
+Usage:
+
+```sh
+$ translate xcstrings --to de --to fr path/to/Localizations.xcstrings path/to/Localizations_translated.xcstrings
+```
+
+Strings marked in Xcode as "Don't Translate" will be skipped.
+
+When no output path is given, the resulting json will be output to standard out. The status messages are printed to standard error, so you can redict stdout to a file or pipe it into a different tool, e.g.
+
+```sh
+$ translate xcstrings --to de Localizations.xcstrings | jq '.strings | keys'
+```
+
+When the field for a given translation already has a value, it will be skipped unless the `--replace-translations` flag is set.
+
+
 

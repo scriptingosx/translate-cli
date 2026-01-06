@@ -40,7 +40,7 @@ struct TranslateXCStringsTests {
     files.to = [Locale(identifier: "fr")]
     files.sourcePath = "placeholder"
     files.state = .needsReview
-    files.overwriteTranslations = false
+    files.replaceTranslations = false
     files.dryRun = false
     return files
   }
@@ -65,7 +65,7 @@ struct TranslateXCStringsTests {
     files.to = [Locale(identifier: "fr")]
     files.sourcePath = "placeholder"
     files.state = .needsReview
-    files.overwriteTranslations = false
+    files.replaceTranslations = false
     files.dryRun = false
     // Replace engine within function
     let sourceLang = Locale(identifier: "en").language

@@ -28,7 +28,11 @@ struct Translate: AsyncParsableCommand {
       You only need to download the languages you are going to use.    
       """,
     version: "0.3",
-    subcommands: [ TranslateArguments.self, DetectLanguage.self, TranslateXCStrings.self],
+    subcommands: [
+      TranslateArguments.self,
+      DetectLanguage.self,
+      TranslateXCStrings.self
+    ],
     defaultSubcommand: TranslateArguments.self
   )
 

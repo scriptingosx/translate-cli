@@ -29,22 +29,22 @@ struct TranslateXCStrings: AsyncParsableCommand {
   
   @ParentCommand var parent: Translate
   
-  @Argument(help: "path to source file")
+  @Argument(help: "Path to source file.")
   var sourcePath: String
   
-  @Argument(help: "path to translated output file")
+  @Argument(help: "Path to translated output file. When omitted, json is written to stdout.")
   var outputPath: String?
   
   @Option(help: "Target language code.")
   var to: [Locale]
   
-  @Option(help: "state that is set on translated strings")
+  @Option(help: "Set to 'translated' to mark translated strings as such.")
   var state: State = .needsReview
   
-  @Flag(name: .long, help: "Overwrite existing translations.")
-  var overwriteTranslations: Bool = false
+  @Flag(name: .long, help: "Replace existing translations.")
+  var replaceTranslations: Bool = false
   
-  @Flag(name: .long, help: "dry run, don't write anything")
+  @Flag(name: .long, help: ArgumentHelp("dry run, don't write anything", visibility: .hidden))
   var dryRun: Bool = false
   
   // MARK: functions
@@ -95,15 +95,13 @@ struct TranslateXCStrings: AsyncParsableCommand {
       errorPrint("ℹ️  '\(key)': \(baseValue)")
       
       // loop through targetTranslations
-      for targetLocale in to {
-        let targetLanguageCode = targetLocale.language.minimalIdentifier
-        
+      for targetLocale in to {        
         // don't translate/replace existing translations
         if let localization = localizations[targetLocale.identifier] as? [String:Any],
            let stringUnit = localization["stringUnit"] as? [String:String],
            let stringValue = stringUnit["value"],
            !stringValue.isEmpty,
-           !overwriteTranslations {
+           !replaceTranslations {
           errorPrint("ℹ️  \(targetLocale.identifier): translation exists")
           continue
         }
@@ -111,7 +109,7 @@ struct TranslateXCStrings: AsyncParsableCommand {
         // add translations
         do {
           let translated = try await engine.translate(baseValue, from: sourceLanguage, to: targetLocale.language)
-          errorPrint("✅ \(targetLocale.identifier)): \(translated)")
+          errorPrint("✅ \(targetLocale.identifier): \(translated)")
           let translatedLocalization = [
             "stringUnit": [
               "state": state.rawValue,
