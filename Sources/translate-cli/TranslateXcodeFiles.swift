@@ -1,5 +1,5 @@
   //
-  //  TranslateXcodeFiles.swift
+  //  TranslateXCStringsFiles.swift
   //  translate-cli
   //
   //  Created by Armin Briegel on 2026-01-03.
@@ -133,7 +133,7 @@ struct TranslateXcodeFiles: AsyncParsableCommand {
   
   func translateXCString(_ stringsDict: [String:Any]) async throws -> [String:Any] {
     // get source language
-    let sourceLanguageCode = (stringsDict["stringsFileLanguageCode"] as? String) ?? "en"
+    let sourceLanguageCode = (stringsDict["sourceLanguage"] as? String) ?? "en"
     
     let sourceLocale = Locale(identifier: sourceLanguageCode)
     let sourceLanguage = sourceLocale.language

@@ -44,13 +44,13 @@ struct TranslateArguments: AsyncParsableCommand {
   }
 
   /// returns either the Language from the `--to` option or the current system language
-  var targetLanguages: [Locale.Language] {
+  lazy var targetLanguages: [Locale.Language] = {
     if to.count > 0 {
       return to.compactMap(\.language)
     } else {
       return [ Locale.current.language ]
     }
-  }
+  }()
 
   /// returns either the language from the `--from` option or the dominant language from the `text`
   func sourceLanguage(_ text: String) -> Locale.Language {
@@ -77,7 +77,7 @@ struct TranslateArguments: AsyncParsableCommand {
     return lines.joined(separator: "\n")
   }
 
-  func run() async throws {
+  mutating func run() async throws {
     let text = arguments.isEmpty ? readFromStdin() : try joined(arguments: arguments)
     let sourceLanguage = sourceLanguage(text)
     let engine = TranslateEngine()
@@ -87,7 +87,7 @@ struct TranslateArguments: AsyncParsableCommand {
       throw CleanExit.message("\(sourceLanguage.localizedName ?? "unknown") (\(sourceLanguage.languageCode ?? "unknown"))")
     }
 
-    if to.count == 1,
+    if targetLanguages.count == 1,
        let targetLanguage = targetLanguages.first {
       
       let translation = try await engine.translate(text, from: sourceLanguage, to: targetLanguage)
