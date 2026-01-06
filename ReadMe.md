@@ -80,10 +80,10 @@ This is a short sentence.
 
 ### Language detection
 
-When you add the `--detect` flag, the detected source language code will be printed:
+Use the `detect` subcommand to detect the dominant language in the text:
 
 ```sh
-$ translate --detect "Dies ist ein kurzer Satz."
+$ translate detect "Dies ist ein kurzer Satz."
 de
 ```
 

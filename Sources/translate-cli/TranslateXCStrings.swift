@@ -9,7 +9,7 @@ import Foundation
 import ArgumentParser
 import Translation
 
-struct TranslateXcodeFiles: AsyncParsableCommand {
+struct TranslateXCStrings: AsyncParsableCommand {
   enum State: String, ExpressibleByArgument {
     case translated
     case needsReview = "needs_review"
@@ -80,7 +80,7 @@ struct TranslateXcodeFiles: AsyncParsableCommand {
         continue
       }
       
-      let engine = TranslateEngine()
+      let engine = Engine()
       var translatedValue = value
       var localizations = value["localizations"] as? [String:Any] ?? [:]
       

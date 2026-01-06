@@ -7,13 +7,11 @@
 
 import Foundation
 import ArgumentParser
-import NaturalLanguage
-import Translation
 
 struct TranslateArguments: AsyncParsableCommand {
 
   static let configuration = CommandConfiguration(
-    commandName: "text",
+    commandName: "translate",
     abstract: "Translate text using Apple Translation.",
     discussion: "Translates text passed as arguments from one language to another.",
   )
@@ -30,9 +28,6 @@ struct TranslateArguments: AsyncParsableCommand {
 
   @Option(name: .long, help: "Source language code. If omitted, auto-detect.")
   var from: Locale?
-
-  @Flag(help: "detect the language of the text and print the code")
-  var detect: Bool = false
 
   /// returns the `arguments` array as a single string joined with spaces. Throws when the `arguments` array is empty.
   func joined(arguments: [String]) throws -> String {
@@ -54,16 +49,8 @@ struct TranslateArguments: AsyncParsableCommand {
 
   /// returns either the language from the `--from` option or the dominant language from the `text`
   func sourceLanguage(_ text: String) -> Locale.Language {
-    from?.language ?? detectLanguage(text) ?? Locale.current.language
-  }
-
-  /// returns the dominant language of the `text`
-  func detectLanguage(_ text: String) -> Locale.Language? {
-    if let dominantLanguage = NLLanguageRecognizer.dominantLanguage(for: text) {
-      return Locale.Language(identifier: dominantLanguage.rawValue)
-    } else {
-      return nil
-    }
+    let engine = Engine()
+    return from?.language ?? engine.detectLanguage(text) ?? Locale.current.language
   }
 
   /// reads a string of text from standard in
@@ -78,14 +65,10 @@ struct TranslateArguments: AsyncParsableCommand {
   }
 
   mutating func run() async throws {
-    let text = arguments.isEmpty ? readFromStdin() : try joined(arguments: arguments)
-    let sourceLanguage = sourceLanguage(text)
-    let engine = TranslateEngine()
+    let engine = Engine()
 
-    // TODO: detect should be its own sub command
-    if detect {
-      throw CleanExit.message("\(sourceLanguage.localizedName ?? "unknown") (\(sourceLanguage.languageCode ?? "unknown"))")
-    }
+    let text = engine.text(arguments: arguments)
+    let sourceLanguage = sourceLanguage(text)
 
     if targetLanguages.count == 1,
        let targetLanguage = targetLanguages.first {

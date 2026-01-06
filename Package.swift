@@ -22,9 +22,9 @@ let package = Package(
       ]
     ),
     .testTarget(
-      name: "translateTests",
+      name: "TestTranslateArguments",
       dependencies: ["translate"],
-      path: "Tests/translateTests",
+      path: "Tests/",
       resources: [
         // .copy("Fixtures/sample.json") // optional resources for tests
       ]

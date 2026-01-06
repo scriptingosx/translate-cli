@@ -1,5 +1,5 @@
 //
-//  TranslateEngine.swift
+//  Engine.swift
 //  translate-cli
 //
 //  Created by Armin Briegel on 2026-01-05.
@@ -8,8 +8,14 @@
 import Foundation
 import ArgumentParser
 import Translation
+import NaturalLanguage
 
-struct TranslateEngine {
+struct Engine {
+  
+  enum EngineError: Error {
+    case noTextToTranslate
+  }
+  
   /// returns the translation for `text`, `source` and `target`
   func translate(
     _ text: String,
@@ -39,5 +45,30 @@ struct TranslateEngine {
       """)
       throw TranslationError.notInstalled
     }
+  }
+  
+  /// returns the dominant language of the `text`
+  func detectLanguage(_ text: String) -> Locale.Language? {
+    if let dominantLanguage = NLLanguageRecognizer.dominantLanguage(for: text) {
+      return Locale.Language(identifier: dominantLanguage.rawValue)
+    } else {
+      return nil
+    }
+  }
+  
+  /// reads a string of text from standard in
+  func readFromStdin () -> String {
+    var lines: [String] = []
+    
+    while let line = readLine() {
+      lines.append(line)
+    }
+    
+    return lines.joined(separator: "\n")
+  }
+  
+  /// either returns the joined arguments or text from stdin
+  func text(arguments: [String]) -> String {
+    arguments.isEmpty ? readFromStdin() : arguments.joined(separator: " ")
   }
 }

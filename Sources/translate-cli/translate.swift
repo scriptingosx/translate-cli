@@ -27,8 +27,8 @@ struct Translate: AsyncParsableCommand {
       _before_ using this tool. Otherwise you will get `Error: Unable to Translate` messages. \
       You only need to download the languages you are going to use.    
       """,
-    version: "0.2",
-    subcommands: [ TranslateArguments.self, TranslateXcodeFiles.self],
+    version: "0.3",
+    subcommands: [ TranslateArguments.self, DetectLanguage.self, TranslateXCStrings.self],
     defaultSubcommand: TranslateArguments.self
   )
 
